@@ -6,4 +6,6 @@ package org.springframework.social.reddit.api;
  */
 public interface UserOperations {
     
+    public RedditProfile getUserProfile();
+    
 }
