@@ -6,10 +6,7 @@
 package org.springframework.social.reddit.connect;
 
 import org.springframework.social.oauth2.AbstractOAuth2ServiceProvider;
-import org.springframework.social.oauth2.OAuth2Operations;
-import org.springframework.social.oauth2.OAuth2Template;
 import org.springframework.social.reddit.api.Reddit;
-import org.springframework.social.reddit.api.impl.RedditPaths;
 import org.springframework.social.reddit.api.impl.RedditTemplate;
 
 /**
@@ -19,8 +16,7 @@ import org.springframework.social.reddit.api.impl.RedditTemplate;
 public final class RedditServiceProvider extends AbstractOAuth2ServiceProvider<Reddit> {
 
     public RedditServiceProvider(String clientId, String clientSecret) {
-        super(new OAuth2Template(clientId, clientSecret, 
-                RedditPaths.OAUTH_AUTH_URL, RedditPaths.OAUTH_TOKEN_URL));
+        super(new RedditOAuth2Template(clientId, clientSecret));
     }
 
     public Reddit getApi(String accessToken) {

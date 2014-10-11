@@ -18,6 +18,8 @@ public class RedditConnectionFactory extends OAuth2ConnectionFactory<Reddit>{
 
     public RedditConnectionFactory(String clientId, String clientSecret) {
         super("reddit", new RedditServiceProvider(clientId, clientSecret), new RedditAdapter());
+        
     }
+    
     
 }

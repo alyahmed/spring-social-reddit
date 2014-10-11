@@ -12,8 +12,13 @@ import org.springframework.social.reddit.api.UserOperations;
  *
  * @author ahmedaly
  */
-public class UserTemplate implements UserOperations {
+public class UserTemplate extends AbstractRedditOperations implements UserOperations {
 
+    public UserTemplate(boolean isUserAuthorized, boolean isAppAuthorized) {
+        super(isUserAuthorized, isAppAuthorized);
+    }
+    
+    
     @Override
     public RedditProfile getUserProfile() {
         return null;

@@ -52,10 +52,8 @@ public class AbstractRedditOperations {
     }
 
     protected URI buildUri(String path, MultiValueMap<String, String> parameters) {
-        return URIBuilder.fromUri(API_URL_BASE + path).queryParams(parameters).build();
+        return URIBuilder.fromUri(RedditPaths.OAUTH_API_DOMAIN + path).queryParams(parameters).build();
     }
-
-    private static final String API_URL_BASE = "https://ssl.reddit.com";
 
     private static final LinkedMultiValueMap<String, String> EMPTY_PARAMETERS = new LinkedMultiValueMap<String, String>();
 
