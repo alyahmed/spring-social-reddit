@@ -4,7 +4,7 @@
 
     <groupId>org.springframework.social</groupId>
     <artifactId>spring-social-reddit</artifactId>
-    <version>1.0</version>
+    <version>1.0.5-SNAPSHOT</version>
     <packaging>jar</packaging>
 
     <name>spring-social-reddit</name>
@@ -19,14 +19,14 @@
         <mockito.version>1.8.4</mockito.version>
     </properties>
     
-    <!--    
+        
     <licenses>
         <license>
             <name>The Apache Software License, Version 2.0</name>
             <url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
             <distribution>repo</distribution>
         </license>
-    </licenses>-->
+    </licenses>
     
     
     <dependencies>

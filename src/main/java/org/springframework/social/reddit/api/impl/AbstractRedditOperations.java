@@ -5,6 +5,7 @@ import org.springframework.social.MissingAuthorizationException;
 import org.springframework.social.support.URIBuilder;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
+import org.springframework.web.client.RestTemplate;
 
 /**
  * Base Operations class representing common functionality among all Operations
@@ -14,31 +15,24 @@ import org.springframework.util.MultiValueMap;
  */
 public class AbstractRedditOperations {
 
-    private final boolean isUserAuthorized;
+    private final RestTemplate restTemplate;
+    private boolean isAuthorized;
 
-    private boolean isAppAuthorized;
+    private static final LinkedMultiValueMap<String, String> EMPTY_PARAMETERS = new LinkedMultiValueMap<String, String>();
 
-    public AbstractRedditOperations(boolean isUserAuthorized, boolean isAppAuthorized) {
-        this.isUserAuthorized = isUserAuthorized;
-        this.isAppAuthorized = isAppAuthorized;
+    public AbstractRedditOperations(RestTemplate restTemplate, boolean isAuthorized) {
+        this.isAuthorized = isAuthorized;
+        this.restTemplate = restTemplate;
     }
 
-    protected void requireUserAuthorization() {
-        if (!isUserAuthorized) {
-            throw new MissingAuthorizationException("reddit");
+    protected void requireAuthorization() {
+        if (!isAuthorized) {
+            throw new MissingAuthorizationException("google");
         }
     }
 
-    protected void requireAppAuthorization() {
-        if (!isAppAuthorized) {
-            throw new MissingAuthorizationException("reddit");
-        }
-    }
-
-    protected void requireEitherUserOrAppAuthorization() {
-        if (!isUserAuthorized && !isAppAuthorized) {
-            throw new MissingAuthorizationException("reddit");
-        }
+    protected <T> T getEntity(String url, Class<T> type) {
+        return restTemplate.getForObject(url, type);
     }
 
     protected URI buildUri(String path) {
@@ -54,7 +48,5 @@ public class AbstractRedditOperations {
     protected URI buildUri(String path, MultiValueMap<String, String> parameters) {
         return URIBuilder.fromUri(RedditPaths.OAUTH_API_DOMAIN + path).queryParams(parameters).build();
     }
-
-    private static final LinkedMultiValueMap<String, String> EMPTY_PARAMETERS = new LinkedMultiValueMap<String, String>();
-
+    
 }

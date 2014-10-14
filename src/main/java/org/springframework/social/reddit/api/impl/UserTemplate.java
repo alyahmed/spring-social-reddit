@@ -7,22 +7,26 @@ package org.springframework.social.reddit.api.impl;
 
 import org.springframework.social.reddit.api.RedditProfile;
 import org.springframework.social.reddit.api.UserOperations;
+import org.springframework.web.client.RestTemplate;
 
 /**
  *
  * @author ahmedaly
  */
 public class UserTemplate extends AbstractRedditOperations implements UserOperations {
-
-    public UserTemplate(boolean isUserAuthorized, boolean isAppAuthorized) {
-        super(isUserAuthorized, isAppAuthorized);
-    }
     
+    private static final String USER_KARMA = RedditPaths.OAUTH_API_DOMAIN + "/api/v1/me/karma"; //Requires mysubreddits scope
+    private static final String USER_PREFERENCES = RedditPaths.OAUTH_API_DOMAIN + "/api/v1/me/prefs"; //Requires Account Scope
+    
+    public UserTemplate(RestTemplate restTemplate, boolean isAuthorized){
+        super(restTemplate, isAuthorized);
+    }
     
     @Override
     public RedditProfile getUserProfile() {
-        return null;
+        return getEntity(USER_PREFERENCES, RedditProfile.class);
     }
+    
     
     
 }

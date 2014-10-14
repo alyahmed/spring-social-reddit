@@ -8,4 +8,5 @@ public interface UserOperations {
     
     public RedditProfile getUserProfile();
     
+    
 }

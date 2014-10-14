@@ -5,14 +5,12 @@
  */
 package org.springframework.social.reddit.api.impl;
 
-import org.springframework.social.oauth1.AbstractOAuth1ApiBinding;
+import org.springframework.social.oauth2.AbstractOAuth2ApiBinding;
 import org.springframework.social.reddit.api.MessageOperations;
 import org.springframework.social.reddit.api.Reddit;
 import org.springframework.social.reddit.api.SubredditOperations;
 import org.springframework.social.reddit.api.ThreadOperations;
 import org.springframework.social.reddit.api.UserOperations;
-import org.springframework.util.Assert;
-import org.springframework.web.client.RestTemplate;
 
 /**
  * Implementation of Reddit API Binding interface.
@@ -25,24 +23,27 @@ import org.springframework.web.client.RestTemplate;
  *
  * @author ahmedaly
  */
-public class RedditTemplate extends AbstractOAuth1ApiBinding implements Reddit {
+public class RedditTemplate extends AbstractOAuth2ApiBinding implements Reddit {
+
+    private String accessToken;
 
     private MessageOperations messageOperations;
     private UserOperations userOperations;
     private SubredditOperations subredditOperations;
     private ThreadOperations threadOperations;
 
-    private RestTemplate restTemplate = null;
-
-    public RedditTemplate(String consumerKey, String consumerSecret, String accessToken, String accessTokenSecret) {
-        super(consumerKey, consumerSecret, accessToken, accessTokenSecret);
-        initSubApis();
+    public RedditTemplate() {
+        setUp();
     }
 
-    public RedditTemplate(String clientToken) {
-        super();
-        Assert.notNull(clientToken, "Constructor arguement 'client token' cannot be null");
-        this.restTemplate = createRestTemplate(clientToken);
+    public RedditTemplate(String accessToken) {
+        super(accessToken);
+        this.accessToken = accessToken;
+        setUp();
+    }
+
+    private void setUp() {
+        this.userOperations = new UserTemplate(getRestTemplate(), isAuthorized());
     }
 
     @Override
@@ -62,21 +63,7 @@ public class RedditTemplate extends AbstractOAuth1ApiBinding implements Reddit {
 
     @Override
     public UserOperations userOperations() {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        return userOperations;
     }
 
-    private void initSubApis() {
-
-    }
-
-    private RestTemplate createRestTemplate(String clientToken) {
-        RestTemplate rt = new ClientAuthorizedRedditTemplate(clientToken).getRestTemplate();
-        rt.setMessageConverters(getMessageConverters());
-        configureRestTemplate(rt);
-        return restTemplate;
-    }
-
-    private boolean isAuthorizedForApp() {
-        return restTemplate != null;
-    }
 }
