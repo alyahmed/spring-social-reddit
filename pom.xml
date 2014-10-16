@@ -10,13 +10,16 @@
     <name>spring-social-reddit</name>
 
     <properties>
+        <!-- LOGGING -->
+        <log4j.version>2.0-rc1</log4j.version>
+        <!-- Project Settings -->
         <endorsed.dir>${project.build.directory}/endorsed</endorsed.dir>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <commons-logging.version>1.1.1</commons-logging.version>
         <spring-security-crypto.version>3.2.0.RELEASE</spring-security-crypto.version>
         <spring-social.version>1.1.0.RELEASE</spring-social.version>
         <jackson.version>2.2.2</jackson.version>
         <mockito.version>1.8.4</mockito.version>
+        <google.api.http.version>1.2.3-alpha</google.api.http.version>
     </properties>
     
         
@@ -42,11 +45,14 @@
             <version>${mockito.version}</version>
             <scope>test</scope>
         </dependency>
+        
         <dependency>
-            <groupId>commons-logging</groupId>
-            <artifactId>commons-logging</artifactId>
-            <version>${commons-logging.version}</version>
+            <groupId>org.apache.logging.log4j</groupId>
+            <artifactId>log4j-api</artifactId>
+            <version>${log4j.version}</version>
+            <scope>compile</scope>
         </dependency>
+        
         <dependency>
             <groupId>org.springframework.security</groupId>
             <artifactId>spring-security-crypto</artifactId>
@@ -82,6 +88,13 @@
             <artifactId>jackson-databind</artifactId>
             <version>${jackson.version}</version>
         </dependency>
+        <dependency>
+	<groupId>com.google.api.client</groupId>
+	<artifactId>google-api-client-http</artifactId>
+	<version>${google.api.http.version}</version>
+</dependency>
+
+        
     </dependencies>
 
     <build>

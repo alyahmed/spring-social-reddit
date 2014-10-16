@@ -9,24 +9,23 @@ import org.springframework.social.ApiException;
 import org.springframework.social.connect.ApiAdapter;
 import org.springframework.social.connect.ConnectionValues;
 import org.springframework.social.connect.UserProfile;
+import org.springframework.social.connect.UserProfileBuilder;
 import org.springframework.social.reddit.api.Reddit;
 
 /**
  *
  * @author ahmedaly
- */
-public class RedditAdapter implements ApiAdapter<Reddit>{
+ */public class RedditAdapter implements ApiAdapter<Reddit> {
 
-    @Override
-    public boolean test(Reddit reddit) {
-        try{
-            reddit.userOperations().getUserProfile();
-            return true;
-        }
-        catch(ApiException e){
-            return false;
-        }
-    }
+	public boolean test(Reddit reddit) {
+		try {
+			reddit.userOperations().getUserProfile();
+			return true;
+		} catch (ApiException e) {
+			return false;
+		}
+	}
+
 
     @Override
     public void setConnectionValues(Reddit api, ConnectionValues values) {
@@ -42,7 +41,5 @@ public class RedditAdapter implements ApiAdapter<Reddit>{
     public void updateStatus(Reddit api, String message) {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
-    
-    
-    
+
 }

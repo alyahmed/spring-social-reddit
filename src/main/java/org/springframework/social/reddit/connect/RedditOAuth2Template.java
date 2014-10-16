@@ -6,6 +6,8 @@
 package org.springframework.social.reddit.connect;
 
 import java.util.Map;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
@@ -22,12 +24,15 @@ import org.springframework.util.MultiValueMap;
  */
 public class RedditOAuth2Template extends OAuth2Template {
 
+    private static final Logger LOG = LogManager.getLogger(RedditOAuth2Template.class);
+
     public RedditOAuth2Template(String clientId, String clientSecret) {
         super(clientId, clientSecret, RedditPaths.OAUTH_AUTH_URL, RedditPaths.OAUTH_TOKEN_URL);
         setUseParametersForClientAuthentication(true);
     }
 
     @Override
+    @SuppressWarnings({"unchecked", "rawtypes"})
     protected AccessGrant postForAccessGrant(String accessTokenUrl, MultiValueMap<String, String> parameters) {
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
@@ -47,7 +52,6 @@ public class RedditOAuth2Template extends OAuth2Template {
         Long expiresIn = (expiresInNumber == null) ? null : expiresInNumber.longValue();
 
         return createAccessGrant(accessToken, scope, refreshToken, expiresIn, result);
-
     }
 
 }

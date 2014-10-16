@@ -19,6 +19,7 @@ public final class RedditServiceProvider extends AbstractOAuth2ServiceProvider<R
         super(new RedditOAuth2Template(clientId, clientSecret));
     }
 
+    @Override
     public Reddit getApi(String accessToken) {
         return new RedditTemplate(accessToken);
     }
