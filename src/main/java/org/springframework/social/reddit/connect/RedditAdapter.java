@@ -29,17 +29,15 @@ import org.springframework.social.reddit.api.Reddit;
 
     @Override
     public void setConnectionValues(Reddit api, ConnectionValues values) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 
     @Override
     public UserProfile fetchUserProfile(Reddit api) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        return new UserProfileBuilder().setUsername("boxsc2").setFirstName("Ahmed").build();
     }
 
     @Override
     public void updateStatus(Reddit api, String message) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 
 }

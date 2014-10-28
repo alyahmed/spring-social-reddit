@@ -5,16 +5,27 @@
  */
 package org.springframework.social.reddit.connect;
 
-import java.nio.charset.Charset;
-import java.util.Base64;
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.UnsupportedEncodingException;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
+import java.util.logging.Level;
+import org.apache.http.HttpEntity;
+import org.apache.http.HttpResponse;
+import org.apache.http.NameValuePair;
+import org.apache.http.auth.AuthScope;
+import org.apache.http.auth.UsernamePasswordCredentials;
+import org.apache.http.client.entity.UrlEncodedFormEntity;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.impl.client.DefaultHttpClient;
+import org.apache.http.message.BasicNameValuePair;
+import org.apache.http.util.EntityUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpMethod;
-import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
+import org.json.simple.JSONValue;
 import org.springframework.social.oauth2.AccessGrant;
 import org.springframework.social.oauth2.OAuth2Template;
 import org.springframework.social.reddit.api.impl.RedditPaths;
@@ -37,43 +48,63 @@ public class RedditOAuth2Template extends OAuth2Template {
         this.clientSecret = clientSecret;
     }
 
+    private String getAccessToken(String code, String redirectUrl) throws UnsupportedEncodingException, IOException {
+        DefaultHttpClient httpclient = new DefaultHttpClient();
+        try {
+            httpclient.getCredentialsProvider().setCredentials(
+                    new AuthScope("ssl.reddit.com", 443),
+                    new UsernamePasswordCredentials(clientId,clientSecret));
+
+            HttpPost httppost = new HttpPost("https://ssl.reddit.com/api/v1/access_token");
+
+            List<NameValuePair> nvps = new ArrayList<NameValuePair>(3);
+            nvps.add(new BasicNameValuePair("code", code));
+            nvps.add(new BasicNameValuePair("grant_type", "authorization_code"));
+            nvps.add(new BasicNameValuePair("redirect_uri", redirectUrl));
+
+            httppost.setEntity(new UrlEncodedFormEntity(nvps));
+            httppost.addHeader("User-Agent", "a unique user agent");
+            httppost.setHeader("Accept", "any;");
+
+            // System.out.println("executing request " + httppost.getRequestLine());
+            HttpResponse response = httpclient.execute(httppost);
+            HttpEntity entity = response.getEntity();
+
+            //System.out.println(response.getStatusLine());
+            if (entity != null) {
+                BufferedReader br = new BufferedReader(new InputStreamReader(response.getEntity().getContent()));
+                StringBuilder content = new StringBuilder();
+                String line;
+                while (null != (line = br.readLine())) {
+                    content.append(line);
+                }
+                System.out.println(content.toString());
+                Map json = (Map) JSONValue.parse(content.toString());
+                if (json.containsKey("access_token")) {
+                    return (String) (json.get("access_token"));
+                }
+            }
+            EntityUtils.consume(entity);
+        } finally {
+            // When HttpClient instance is no longer needed,
+            // shut down the connection manager to ensure
+            // immediate deallocation of all system resources
+            httpclient.getConnectionManager().shutdown();
+        }
+        return null;
+    }
+
     @Override
-    @SuppressWarnings({"unchecked", "rawtypes"})
-    protected AccessGrant postForAccessGrant(String accessTokenUrl, MultiValueMap<String, String> parameters) {
-        HttpHeaders headers = createHeaders(clientId, clientSecret);
-        headers.set(accessTokenUrl, accessTokenUrl);
-        HttpEntity<MultiValueMap<String, String>> requestEntity = new HttpEntity<MultiValueMap<String, String>>(parameters, headers);
-        LOG.info("requestEntity: " + requestEntity.toString());
-        ResponseEntity<Map> responseEntity = getRestTemplate().exchange(accessTokenUrl, HttpMethod.POST, requestEntity, Map.class);
-        LOG.info("response Entity: " + responseEntity);
-        Map<String, Object> responseMap = responseEntity.getBody();
-        LOG.info("response map: " + responseMap);
-        return extractAccessGrant(responseMap);
+    public AccessGrant exchangeForAccess(String authorizationCode, String redirectUri, MultiValueMap<String, String> additionalParameters) {
+        try {
+            String accessToken = getAccessToken(authorizationCode, redirectUri);
+            AccessGrant grant = new AccessGrant(accessToken);
+            return grant;
+        } catch (IOException ex) {
+            java.util.logging.Logger.getLogger(RedditOAuth2Template.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        return null;
     }
 
-    /*
-     Reddit requires client_id and client_secret be 
-     placed via HTTP basic Auth when retrieving the access_token
-     */
-    private HttpHeaders createHeaders(String username, String password) {
-        String auth = username + ":" + password;
-        byte[] encodedAuth = Base64.getEncoder().encode(auth.getBytes(Charset.forName("US-ASCII")));
-        HttpHeaders headers = new HttpHeaders();
-        String authHeader = "Basic " + new String(encodedAuth);
-        headers.set("Authorization", authHeader);
-        return headers;
-    }
-
-    private AccessGrant extractAccessGrant(Map<String, Object> result) {
-        String accessToken = (String) result.get("access_token");
-        String scope = (String) result.get("scope");
-        String refreshToken = (String) result.get("refresh_token");
-
-        // result.get("expires_in") may be an Integer, so cast it to Number first. 	
-        Number expiresInNumber = (Number) result.get("expires_in");
-        Long expiresIn = (expiresInNumber == null) ? null : expiresInNumber.longValue();
-
-        return createAccessGrant(accessToken, scope, refreshToken, expiresIn, result);
-    }
-
+    
 }
