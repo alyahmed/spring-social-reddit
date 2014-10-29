@@ -11,6 +11,8 @@ import org.springframework.social.connect.ConnectionValues;
 import org.springframework.social.connect.UserProfile;
 import org.springframework.social.connect.UserProfileBuilder;
 import org.springframework.social.reddit.api.Reddit;
+import org.springframework.social.reddit.api.RedditProfile;
+import org.springframework.social.reddit.api.impl.RedditPaths;
 
 /**
  *
@@ -28,16 +30,26 @@ import org.springframework.social.reddit.api.Reddit;
 
 
     @Override
-    public void setConnectionValues(Reddit api, ConnectionValues values) {
+    public void setConnectionValues(Reddit reddit, ConnectionValues values) {
+        RedditProfile profile = reddit.userOperations().getUserProfile();
+        values.setProfileUrl(
+                new StringBuilder(RedditPaths.USER_BASE_URL).append(profile.getUsername()).toString());
+        values.setProviderUserId(profile.getUsername());
+        values.setDisplayName(profile.getUsername());
     }
 
     @Override
-    public UserProfile fetchUserProfile(Reddit api) {
-        return new UserProfileBuilder().setUsername("boxsc2").setFirstName("Ahmed").build();
+    public UserProfile fetchUserProfile(Reddit reddit) {
+        RedditProfile profile = reddit.userOperations().getUserProfile();
+        return new UserProfileBuilder()
+                .setUsername(profile.getUsername())
+                .setName(profile.getUsername())
+                .build();
+                                            
     }
 
     @Override
-    public void updateStatus(Reddit api, String message) {
+    public void updateStatus(Reddit reddit, String message) {
     }
 
 }

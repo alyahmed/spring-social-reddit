@@ -10,6 +10,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.logging.Level;
@@ -51,12 +52,14 @@ public class RedditOAuth2Template extends OAuth2Template {
     private String getAccessToken(String code, String redirectUrl) throws UnsupportedEncodingException, IOException {
         DefaultHttpClient httpclient = new DefaultHttpClient();
         try {
+            
+            //Reddit Requires clientId and clientSecret be attached via basic auth
             httpclient.getCredentialsProvider().setCredentials(
                     new AuthScope("ssl.reddit.com", 443),
                     new UsernamePasswordCredentials(clientId,clientSecret));
 
-            HttpPost httppost = new HttpPost("https://ssl.reddit.com/api/v1/access_token");
-
+            HttpPost httppost = new HttpPost(RedditPaths.OAUTH_TOKEN_URL);
+            
             List<NameValuePair> nvps = new ArrayList<NameValuePair>(3);
             nvps.add(new BasicNameValuePair("code", code));
             nvps.add(new BasicNameValuePair("grant_type", "authorization_code"));
@@ -66,13 +69,11 @@ public class RedditOAuth2Template extends OAuth2Template {
             httppost.addHeader("User-Agent", "a unique user agent");
             httppost.setHeader("Accept", "any;");
 
-            // System.out.println("executing request " + httppost.getRequestLine());
-            HttpResponse response = httpclient.execute(httppost);
-            HttpEntity entity = response.getEntity();
-
-            //System.out.println(response.getStatusLine());
-            if (entity != null) {
-                BufferedReader br = new BufferedReader(new InputStreamReader(response.getEntity().getContent()));
+            HttpResponse request = httpclient.execute(httppost); 
+            HttpEntity response = request.getEntity(); // Reddit response containing accessToken
+            
+            if (response != null) {
+                BufferedReader br = new BufferedReader(new InputStreamReader(response.getContent()));
                 StringBuilder content = new StringBuilder();
                 String line;
                 while (null != (line = br.readLine())) {
@@ -84,16 +85,13 @@ public class RedditOAuth2Template extends OAuth2Template {
                     return (String) (json.get("access_token"));
                 }
             }
-            EntityUtils.consume(entity);
+            EntityUtils.consume(response);
         } finally {
-            // When HttpClient instance is no longer needed,
-            // shut down the connection manager to ensure
-            // immediate deallocation of all system resources
-            httpclient.getConnectionManager().shutdown();
+            httpclient.getConnectionManager().shutdown(); //cleanup
         }
         return null;
     }
-
+    
     @Override
     public AccessGrant exchangeForAccess(String authorizationCode, String redirectUri, MultiValueMap<String, String> additionalParameters) {
         try {
